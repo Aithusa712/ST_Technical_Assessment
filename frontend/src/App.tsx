@@ -2,6 +2,8 @@
 // import heroImg from './assets/hero.png'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from './assets/vite.svg'
+import CsvUpload from "./components/csvUpload.tsx";
+
 import './App.css'
 
 function App() {
@@ -11,6 +13,10 @@ function App() {
     <>
       <h1></h1>
       <p>Enjoy your dashboard.</p>
+
+      <h1>Upload CSV</h1>
+      <CsvUpload />
+
     </>
   )
 }
