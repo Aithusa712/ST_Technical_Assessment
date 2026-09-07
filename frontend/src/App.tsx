@@ -1,24 +1,50 @@
-// import { useState } from 'react'
-// import heroImg from './assets/hero.png'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from './assets/vite.svg'
-import CsvUpload from "./components/csvUpload.tsx";
+import { useState } from "react";
+import Upload from "./components/CsvUpload";
+import Table from "./components/Table";
+import SocketUpdate from "./components/SocketUpdate";
+import ConflictDialog, { type Conflict } from "./components/Conflict";
 
-import './App.css'
+type Tab = "view" | "update";
 
-function App() {
-  // const [count, setCount] = useState(0)
+export default function App() {
+  const [tab, setTab] = useState<Tab>("view");
+  // SocketUpdate reports what the server says; the dialog displays it. Neither
+  // knows about the other.
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
+
+  const blocked = conflicts.length > 0;
 
   return (
-    <>
-      <h1></h1>
-      <p>Enjoy your dashboard.</p>
+    <main>
+      <header>
+        <h1>Comments dataset</h1>
+      </header>
 
-      <h1>Upload CSV</h1>
-      <CsvUpload />
+      <div className="tabs" role="tablist">
+        {(["view", "update"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            className={tab === t ? "tab active" : "tab"}
+            disabled={blocked}
+            title={blocked ? "Resolve the conflicts first" : undefined}
+            onClick={() => setTab(t)}
+          >
+            {t === "view" ? "View" : "Update"}
+          </button>
+        ))}
+      </div>
 
-    </>
-  )
+      <div className="split">
+        <div className="pane">
+          {tab === "view" ? <Table /> : <Upload onFinished={() => setTab("view")} />}
+        </div>
+
+        <SocketUpdate onConflicts={setConflicts} />
+      </div>
+
+      {blocked && <ConflictDialog conflicts={conflicts} />}
+    </main>
+  );
 }
-
-export default App
