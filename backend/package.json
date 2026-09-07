@@ -2,7 +2,8 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "mongoose": "^9.9.5"
+    "mongoose": "^9.9.5",
+    "socket.io": "^4.8.3"
   },
   "name": "backend",
   "version": "1.0.0",
