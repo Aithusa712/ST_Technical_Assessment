@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "cors": "^2.8.6",
+    "csv-parse": "^7.0.2",
     "express": "^5.2.1",
     "mongoose": "^9.9.5",
     "socket.io": "^4.8.3"
@@ -9,9 +10,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "type": "commonjs",
   "devDependencies": {
@@ -19,6 +17,11 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.4.1",
     "tsx": "^4.23.13",
-    "typescript": "^7.0.2"
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
   }
 }

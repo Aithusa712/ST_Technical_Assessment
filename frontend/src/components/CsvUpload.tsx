@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import axios from "axios";
+import type { Conflict } from "./Conflict";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
-type Result = { added: number; unchanged: number; conflicts: number };
+type Result = { batchId: string; added: number; unchanged: number; conflicts: Conflict[] };
 
-export default function CsvUpload({ onFinished }: { onFinished: () => void }) {
+export default function CsvUpload({
+  onFinished,
+  onUploaded,
+}: {
+  onFinished: () => void;
+  onUploaded: (batchId: string, conflicts: Conflict[]) => void;
+}) {
   const [progress, setProgress] = useState<number | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +43,7 @@ export default function CsvUpload({ onFinished }: { onFinished: () => void }) {
           setProgress(p.total ? Math.round((p.loaded / p.total) * 100) : null),
       });
       setResult(res.data);
+      onUploaded(res.data.batchId, res.data.conflicts);
       // Hold the summary long enough to read, then go back to the table.
       timer.current = window.setTimeout(onFinished, 1400);
     } catch (err) {
@@ -65,7 +73,7 @@ export default function CsvUpload({ onFinished }: { onFinished: () => void }) {
 
       {result && (
         <p className="ok">
-          {result.added} added · {result.unchanged} unchanged · {result.conflicts} need review
+          {result.added} added · {result.unchanged} unchanged · {result.conflicts.length} need review
         </p>
       )}
 

@@ -5,11 +5,19 @@ type Change = { field: string; oldValue: string; newValue: string };
 
 export type Conflict = {
   _id: string;
-  commentId: number;
+  id: number;
   changes: Change[];
 };
 
-export default function ConflictDialog({ conflicts }: { conflicts: Conflict[] }) {
+export default function ConflictDialog({
+  batchId,
+  conflicts,
+  onChange,
+}: {
+  batchId: string;
+  conflicts: Conflict[];
+  onChange: (conflicts: Conflict[]) => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,11 +28,14 @@ export default function ConflictDialog({ conflicts }: { conflicts: Conflict[] })
     };
   }, []);
 
-  const send = async (url: string) => {
+  // The action already tells us the resulting state, so we apply it directly
+  // instead of refetching — this session is the only one that can see these.
+  const send = async (url: string, next: Conflict[]) => {
     setBusy(true);
     setError(null);
     try {
       await axios.post(url);
+      onChange(next);
     } catch (err) {
       setError(
         axios.isAxiosError(err)
@@ -52,7 +63,7 @@ export default function ConflictDialog({ conflicts }: { conflicts: Conflict[] })
         <div className="modal-body">
           {conflicts.map((c) => (
             <article key={c._id} className="crow">
-              <h3>id {c.commentId}</h3>
+              <h3>id {c.id}</h3>
 
               <table className="diff">
                 <thead>
@@ -76,14 +87,24 @@ export default function ConflictDialog({ conflicts }: { conflicts: Conflict[] })
               <div className="actions">
                 <button
                   disabled={busy}
-                  onClick={() => send(`/api/conflicts/${c._id}/resolve?keep=current`)}
+                  onClick={() =>
+                    send(
+                      `/api/conflicts/${c._id}/resolve?keep=current`,
+                      conflicts.filter((x) => x._id !== c._id)
+                    )
+                  }
                 >
                   Delete
                 </button>
                 <button
                   className="primary"
                   disabled={busy}
-                  onClick={() => send(`/api/conflicts/${c._id}/resolve?keep=new`)}
+                  onClick={() =>
+                    send(
+                      `/api/conflicts/${c._id}/resolve?keep=new`,
+                      conflicts.filter((x) => x._id !== c._id)
+                    )
+                  }
                 >
                   Keep
                 </button>
@@ -96,11 +117,15 @@ export default function ConflictDialog({ conflicts }: { conflicts: Conflict[] })
           <button
             className="primary"
             disabled={busy}
-            onClick={() => send("/api/conflicts/keep-all")}
+            onClick={() => send(`/api/conflicts/keep-all?batchId=${batchId}`, [])}
           >
             Keep all
           </button>
-          <button className="ghost" disabled={busy} onClick={() => send("/api/conflicts/cancel")}>
+          <button
+            className="ghost"
+            disabled={busy}
+            onClick={() => send(`/api/conflicts/cancel?batchId=${batchId}`, [])}
+          >
             Cancel
           </button>
         </footer>

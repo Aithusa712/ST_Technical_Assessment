@@ -66,6 +66,172 @@ body {
   margin: 0;
 }
 
+main {
+  padding: 0 20px 20px;
+  text-align: left;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.tab.active {
+  font-weight: bold;
+}
+
+.split {
+  display: flex;
+  gap: 16px;
+}
+
+.pane {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  padding: 10px;
+}
+
+.search {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 10px;
+}
+
+
+.err {
+  color: red;
+}
+
+.ok {
+  color: green;
+}
+
+.muted {
+  color: gray;
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  text-align: left;
+  vertical-align: top;
+  font-size: 14px;
+}
+
+td.body {
+  max-width: 300px;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.feed {
+  width: 220px;
+  border: 1px solid var(--border);
+  padding: 10px;
+}
+
+.feed-head {
+  display: flex;
+  justify-content: space-between;
+}
+
+.dot.on {
+  color: green;
+}
+
+.feed ol {
+  list-style: none;
+  padding: 0;
+}
+
+.feed li {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.feed time {
+  display: block;
+  color: gray;
+  font-size: 12px;
+}
+
+.upload {
+  display: block;
+  border: 1px dashed var(--border);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.upload input[type="file"] {
+  display: none;
+}
+
+.bar {
+  border: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.bar > div {
+  background: var(--accent-bg);
+  height: 20px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 16px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.crow {
+  margin-bottom: 16px;
+}
+
+.actions {
+  margin-top: 8px;
+}
+
+.modal-foot {
+  margin-top: 16px;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

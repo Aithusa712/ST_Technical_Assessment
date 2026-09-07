@@ -1,28 +1,30 @@
+import express from "express";
 import mongoose from "mongoose";
-// import { RowModel, ConflictModel, type Row } from "./model";
-import express, { Request, Response } from "express";
 import cors from "cors";
 import { createServer } from "http";
-import { Server } from "socket.io";
-// import { parse } from "csv-parse/sync";
- 
-const PORT = Number(process.env.PORT) || 5000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/csvcollab";
- 
+import { initSocket } from "./socket";
+import uploadRouter from "./routes/upload";
+import rowsRouter from "./routes/rows";
+import conflictsRouter from "./routes/conflicts";
+
+const MONGO_URI = "mongodb://mongo:27017/csvdata";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.text({ type: ["text/csv", "text/plain"], limit: "25mb" }));
- 
-const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: "*" } });
 
+app.use("/api/upload", uploadRouter);
+app.use("/api/rows", rowsRouter);
+app.use("/api/conflicts", conflictsRouter);
+
+const httpServer = createServer(app);
+initSocket(httpServer); 
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => httpServer.listen(PORT, () => console.log(`http://localhost:${PORT}`)))
+  .then(() => httpServer.listen(5000, () => console.log(`http://localhost:5000`)))
   .catch((e) => {
     console.error("Mongo connection failed:", e.message);
     process.exit(1);
   });
-

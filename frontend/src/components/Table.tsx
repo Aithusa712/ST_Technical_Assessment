@@ -4,7 +4,7 @@ import { socket } from "../socket";
 
 type Row = {
   _id: string;
-  commentId: number;
+  id: number;
   postId: number;
   name: string;
   email: string;
@@ -75,7 +75,7 @@ export default function Table() {
 
       {data && data.items.length === 0 && !loading && (
         <p className="muted">
-          {query ? `Nothing matches “${query}”.` : "Upload a CSV to see rows here."}
+          {query ? `Nothing matches "${query}".` : "Upload a CSV to see rows here."}
         </p>
       )}
 
@@ -95,11 +95,11 @@ export default function Table() {
               <tbody>
                 {data.items.map((r) => (
                   <tr key={r._id}>
-                    <td>{r.commentId}</td>
+                    <td>{r.id}</td>
                     <td>{r.postId}</td>
                     <td>{r.name}</td>
                     <td>{r.email}</td>
-                    <td className="body">{r.body}</td>
+                    <td className="body" title={r.body}>{r.body}</td>
                   </tr>
                 ))}
               </tbody>
