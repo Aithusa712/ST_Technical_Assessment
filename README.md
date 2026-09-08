@@ -10,9 +10,6 @@
 - The dataset contains data of comments from a post (e.g Facebook, Reddit, X Post comments)
 - id column is the unique identfier of this dataset.
 - postID is the unique identifier of a post. Where there can be many comments in 1 post. 
-
-
-
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose — to run the full stack (frontend, backend, MongoDB).
@@ -73,8 +70,6 @@ Row {
   updatedAt: Date        — auto (timestamps)
 }
 ```
-
-There is no second collection. Conflicts detected during a CSV upload are never persisted to the database — they exist only as JSON traveling between the browser and the server for the duration of one review.
 
 ## Conflict Resolution Flow
 
