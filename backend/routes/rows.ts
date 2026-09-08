@@ -23,7 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
   const pages = Math.max(1, Math.ceil(total / limit));
 
   const items = await Row.find(filter)
-    .sort({ id: 1 })
+    .sort({ rowId: 1 })
     .skip((page - 1) * limit)
     .limit(limit)
     .lean();

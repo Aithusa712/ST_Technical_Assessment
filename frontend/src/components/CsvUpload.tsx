@@ -1,23 +1,24 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import axios from "axios";
 import type { Conflict } from "./Conflict";
+import { getErrorMessage } from "../lib/errors";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
-type Result = { reviewId: string; added: number; unchanged: number; conflicts: Conflict[] };
+type UploadResult = { added: number; unchanged: number; conflicts: Conflict[] };
 
 export default function CsvUpload({
   onFinished,
   onUploaded,
 }: {
   onFinished: () => void;
-  onUploaded: (reviewId: string, conflicts: Conflict[]) => void;
+  onUploaded: (conflicts: Conflict[]) => void;
 }) {
   const [progress, setProgress] = useState<number | null>(null);
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rowErrors, setRowErrors] = useState<string[]>([]);
-  const [key, setKey] = useState(0);
+  const [inputKey, setInputKey] = useState(0);
 
   const timer = useRef<number | null>(null);
   useEffect(() => () => {
@@ -37,30 +38,28 @@ export default function CsvUpload({
 
     setProgress(0);
     try {
-      const res = await axios.post<Result>("/api/upload", file, {
+      const res = await axios.post<UploadResult>("/api/upload", file, {
         headers: { "Content-Type": "text/csv" },
         onUploadProgress: (p) =>
           setProgress(p.total ? Math.round((p.loaded / p.total) * 100) : null),
       });
       setResult(res.data);
-      onUploaded(res.data.reviewId, res.data.conflicts);
+      onUploaded(res.data.conflicts);
       // Hold the summary long enough to read, then go back to the table.
       timer.current = window.setTimeout(onFinished, 1400);
     } catch (err) {
-      setError(
-        axios.isAxiosError(err) ? err.response?.data?.error ?? "Upload failed." : "Upload failed."
-      );
+      setError(getErrorMessage(err, "Upload failed."));
       setRowErrors(rowErrorsFrom(err) ?? []);
     } finally {
       setProgress(null);
-      setKey((k) => k + 1); // lets the same file be picked again
+      setInputKey((k) => k + 1); // lets the same file be picked again
     }
   };
 
   return (
     <section className="panel">
       <label className="upload">
-        <input key={key} type="file" accept=".csv,.tsv" onChange={handleFile} />
+        <input key={inputKey} type="file" accept=".csv,.tsv" onChange={handleFile} />
         <span>Choose a CSV file</span>
       </label>
 

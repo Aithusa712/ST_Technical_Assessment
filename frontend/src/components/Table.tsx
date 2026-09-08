@@ -2,28 +2,28 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { socket } from "../socket";
 
-type Row = {
+type DatasetRow = {
   _id: string;
-  id: number;
+  rowId: number;
   postId: number;
   name: string;
   email: string;
   body: string;
 };
 
-type Page = { items: Row[]; total: number; page: number; pages: number };
+type Page = { items: DatasetRow[]; total: number; page: number; pages: number };
 
 export default function Table() {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [version, setVersion] = useState(0);
-  const [result, setResult] = useState<{ key: string; data: Page } | null>(null);
+  const [result, setResult] = useState<{ requestKey: string; data: Page } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // What the current view is asking for. Comparing it against what was last
   // fetched gives us `loading` for free, with no setState before the request.
-  const key = `${page}|${query}`;
-  const loading = result?.key !== key;
+  const requestKey = `${page}|${query}`;
+  const loading = result?.requestKey !== requestKey;
   const data = result?.data ?? null;
 
   // setState happens only in the promise callbacks, never in the effect body.
@@ -36,7 +36,7 @@ export default function Table() {
         signal: controller.signal,
       })
       .then((res) => {
-        setResult({ key, data: res.data });
+        setResult({ requestKey, data: res.data });
         setError(null);
       })
       .catch((err) => {
@@ -45,7 +45,7 @@ export default function Table() {
 
     // Aborting on change means a slow earlier response can't overwrite a newer one.
     return () => controller.abort();
-  }, [key, page, query, version]);
+  }, [requestKey, page, query, version]);
 
   // Any session changing the data refreshes this one. Refetching rather than
   // splicing in a pushed row keeps the page size and the active search honest.
@@ -95,7 +95,7 @@ export default function Table() {
               <tbody>
                 {data.items.map((r) => (
                   <tr key={r._id}>
-                    <td>{r.id}</td>
+                    <td>{r.rowId}</td>
                     <td>{r.postId}</td>
                     <td>{r.name}</td>
                     <td>{r.email}</td>

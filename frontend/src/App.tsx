@@ -5,21 +5,19 @@ import SocketUpdate from "./components/SocketUpdate";
 import ConflictDialog, { type Conflict } from "./components/Conflict";
 
 type Tab = "view" | "update";
-type Review = { reviewId: string; conflicts: Conflict[] };
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("view");
-  const [activeConflicts, setActiveConflicts] = useState<Review | null>(null);
+  const [activeConflicts, setActiveConflicts] = useState<Conflict[]>([]);
 
-  const blocked = (activeConflicts?.conflicts.length ?? 0) > 0;
+  const blocked = activeConflicts.length > 0;
 
-  const handleUploaded = (reviewId: string, conflicts: Conflict[]) => {
-    if (!conflicts.length) return;
-    setActiveConflicts({ reviewId, conflicts });
+  const handleUploaded = (conflicts: Conflict[]) => {
+    if (conflicts.length) setActiveConflicts(conflicts);
   };
 
-  const handleReviewChange = (conflicts: Conflict[]) => {
-    setActiveConflicts((b) => (b ? { ...b, conflicts } : b));
+  const handleConflictsChange = (conflicts: Conflict[]) => {
+    setActiveConflicts(conflicts);
   };
 
   return (
@@ -56,12 +54,8 @@ export default function App() {
         <SocketUpdate />
       </div>
 
-      {blocked && activeConflicts && (
-        <ConflictDialog
-          reviewId={activeConflicts.reviewId}
-          conflicts={activeConflicts.conflicts}
-          onChange={handleReviewChange}
-        />
+      {blocked && (
+        <ConflictDialog conflicts={activeConflicts} onConflictsChange={handleConflictsChange} />
       )}
     </main>
   );

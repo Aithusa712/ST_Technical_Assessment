@@ -7,7 +7,7 @@ import uploadRouter from "./routes/upload";
 import rowsRouter from "./routes/rows";
 import conflictsRouter from "./routes/conflicts";
 
-const MONGO_URI = "mongodb://mongo:27017/csvdata";
+const MONGO_URI = process.env.MONGO_URI ?? "mongodb://mongo:27017/csvdata";
 
 const app = express();
 app.use(cors());

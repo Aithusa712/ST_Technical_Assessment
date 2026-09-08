@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getErrorMessage } from "../lib/errors";
 
 type Change = { field: string; oldValue: string; newValue: string };
+type Incoming = { postId: number; name: string; email: string; body: string };
 
 export type Conflict = {
-  _id: string;
-  id: number;
+  rowId: number;
+  incoming: Incoming;
   changes: Change[];
 };
 
 export default function ConflictDialog({
-  reviewId,
   conflicts,
-  onChange,
+  onConflictsChange,
 }: {
-  reviewId: string;
   conflicts: Conflict[];
-  onChange: (conflicts: Conflict[]) => void;
+  onConflictsChange: (conflicts: Conflict[]) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,20 +28,14 @@ export default function ConflictDialog({
     };
   }, []);
 
-  // The action already tells us the resulting state, so we apply it directly
-  // instead of refetching — this session is the only one that can see these.
-  const send = async (url: string, next: Conflict[]) => {
+  const send = async (url: string, body: unknown, next: Conflict[]) => {
     setBusy(true);
     setError(null);
     try {
-      await axios.post(url);
-      onChange(next);
+      await axios.post(url, body);
+      onConflictsChange(next);
     } catch (err) {
-      setError(
-        axios.isAxiosError(err)
-          ? err.response?.data?.error ?? "Couldn't apply that."
-          : "Couldn't apply that."
-      );
+      setError(getErrorMessage(err, "Couldn't apply that."));
     } finally {
       setBusy(false);
     }
@@ -62,8 +56,8 @@ export default function ConflictDialog({
 
         <div className="modal-body">
           {conflicts.map((c) => (
-            <article key={c._id} className="crow">
-              <h3>id {c.id}</h3>
+            <article key={c.rowId} className="crow">
+              <h3>id {c.rowId}</h3>
 
               <table className="diff">
                 <thead>
@@ -87,12 +81,7 @@ export default function ConflictDialog({
               <div className="actions">
                 <button
                   disabled={busy}
-                  onClick={() =>
-                    send(
-                      `/api/conflicts/${c._id}/resolve?keep=current`,
-                      conflicts.filter((x) => x._id !== c._id)
-                    )
-                  }
+                  onClick={() => onConflictsChange(conflicts.filter((x) => x.rowId !== c.rowId))}
                 >
                   Delete
                 </button>
@@ -101,8 +90,9 @@ export default function ConflictDialog({
                   disabled={busy}
                   onClick={() =>
                     send(
-                      `/api/conflicts/${c._id}/resolve?keep=new`,
-                      conflicts.filter((x) => x._id !== c._id)
+                      "/api/conflicts/resolve",
+                      { rowId: c.rowId, incoming: c.incoming },
+                      conflicts.filter((x) => x.rowId !== c.rowId)
                     )
                   }
                 >
@@ -117,15 +107,17 @@ export default function ConflictDialog({
           <button
             className="primary"
             disabled={busy}
-            onClick={() => send(`/api/conflicts/keep-all?reviewId=${reviewId}`, [])}
+            onClick={() =>
+              send(
+                "/api/conflicts/keep-all",
+                { conflicts: conflicts.map((c) => ({ rowId: c.rowId, incoming: c.incoming })) },
+                []
+              )
+            }
           >
             Keep all
           </button>
-          <button
-            className="ghost"
-            disabled={busy}
-            onClick={() => send(`/api/conflicts/cancel?reviewId=${reviewId}`, [])}
-          >
+          <button className="ghost" disabled={busy} onClick={() => onConflictsChange([])}>
             Cancel
           </button>
         </footer>

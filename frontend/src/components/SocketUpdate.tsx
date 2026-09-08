@@ -16,16 +16,16 @@ export default function SocketUpdate() {
   useEffect(() => {
     const onConnect = () => setOnlineStatus(true);
     const onDisconnect = () => setOnlineStatus(false);
-    const onChange = (a: Changes) => setFeed((prev) => [a, ...prev].slice(0, 40));
+    const handleActivity = (a: Changes) => setFeed((prev) => [a, ...prev].slice(0, 40));
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("activity", onChange);
+    socket.on("activity", handleActivity);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("activity", onChange);
+      socket.off("activity", handleActivity);
     };
   }, []);
 
@@ -34,11 +34,11 @@ export default function SocketUpdate() {
       <div className="feed-head">
         <h2>Changes
         </h2>
-        <span className={onlineStatus ? "dot on" : "dot"}>{onlineStatus ? "Online" : "Offline"}</span>
+        <span className={onlineStatus ? "online" : "offline"}>{onlineStatus ? "Online" : "Offline"}</span>
       </div>
 
       {feed.length === 0 ? (
-        <p className="muted">Changes made in any session appear here as they happen.</p>
+        <p className="muted">Updates from any session appear here as they happen.</p>
       ) : (
         <ol>
           {feed.map((a, i) => (
