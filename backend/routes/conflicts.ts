@@ -9,12 +9,12 @@ const applyIncoming = async (c: any) => {
   await Row.updateOne({ id: c.id }, { postId, name, email, body });
 };
 
-/** Scoped to one batch — never lists another session's conflicts. */
+/** Scoped to one review — never lists another session's conflicts. */
 router.get("/", async (req: Request, res: Response) => {
-  const batchId = String(req.query.batchId ?? "");
-  if (!batchId) return res.status(400).json({ error: "batchId is required" });
+  const reviewId = String(req.query.reviewId ?? "");
+  if (!reviewId) return res.status(400).json({ error: "reviewId is required" });
 
-  res.json(await Conflict.find({ batchId, status: "pending" }).sort({ id: 1 }).lean());
+  res.json(await Conflict.find({ reviewId, status: "pending" }).sort({ id: 1 }).lean());
 });
 
 /** Keep = use the new version. Delete = discard it, current row stands. */
@@ -39,16 +39,16 @@ router.post("/:id/resolve", async (req: Request, res: Response) => {
   res.json({ ok: true });
 });
 
-/** Keep all: apply every incoming version in this batch. */
+/** Keep all: apply every incoming version in this review. */
 router.post("/keep-all", async (req: Request, res: Response) => {
-  const batchId = String(req.query.batchId ?? "");
-  if (!batchId) return res.status(400).json({ error: "batchId is required" });
+  const reviewId = String(req.query.reviewId ?? "");
+  if (!reviewId) return res.status(400).json({ error: "reviewId is required" });
 
-  const pending = await Conflict.find({ batchId, status: "pending" }).lean();
+  const pending = await Conflict.find({ reviewId, status: "pending" }).lean();
   if (!pending.length) return res.json({ ok: true, resolved: 0 });
 
   for (const c of pending) await applyIncoming(c);
-  await Conflict.updateMany({ batchId, status: "pending" }, { status: "resolved" });
+  await Conflict.updateMany({ reviewId, status: "pending" }, { status: "resolved" });
 
   emit("rows:changed");
   activity(`${pending.length} conflict${pending.length > 1 ? "s" : ""} applied`);
@@ -57,11 +57,11 @@ router.post("/keep-all", async (req: Request, res: Response) => {
 
 /** Cancel: close the review without applying anything. Data is untouched. */
 router.post("/cancel", async (req: Request, res: Response) => {
-  const batchId = String(req.query.batchId ?? "");
-  if (!batchId) return res.status(400).json({ error: "batchId is required" });
+  const reviewId = String(req.query.reviewId ?? "");
+  if (!reviewId) return res.status(400).json({ error: "reviewId is required" });
 
   const { modifiedCount } = await Conflict.updateMany(
-    { batchId, status: "pending" },
+    { reviewId, status: "pending" },
     { status: "resolved" }
   );
   if (!modifiedCount) return res.json({ ok: true, cancelled: 0 });

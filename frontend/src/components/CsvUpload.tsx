@@ -4,14 +4,14 @@ import type { Conflict } from "./Conflict";
 
 const MAX_BYTES = 25 * 1024 * 1024;
 
-type Result = { batchId: string; added: number; unchanged: number; conflicts: Conflict[] };
+type Result = { reviewId: string; added: number; unchanged: number; conflicts: Conflict[] };
 
 export default function CsvUpload({
   onFinished,
   onUploaded,
 }: {
   onFinished: () => void;
-  onUploaded: (batchId: string, conflicts: Conflict[]) => void;
+  onUploaded: (reviewId: string, conflicts: Conflict[]) => void;
 }) {
   const [progress, setProgress] = useState<number | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -43,7 +43,7 @@ export default function CsvUpload({
           setProgress(p.total ? Math.round((p.loaded / p.total) * 100) : null),
       });
       setResult(res.data);
-      onUploaded(res.data.batchId, res.data.conflicts);
+      onUploaded(res.data.reviewId, res.data.conflicts);
       // Hold the summary long enough to read, then go back to the table.
       timer.current = window.setTimeout(onFinished, 1400);
     } catch (err) {

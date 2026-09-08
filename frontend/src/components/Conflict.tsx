@@ -10,11 +10,11 @@ export type Conflict = {
 };
 
 export default function ConflictDialog({
-  batchId,
+  reviewId,
   conflicts,
   onChange,
 }: {
-  batchId: string;
+  reviewId: string;
   conflicts: Conflict[];
   onChange: (conflicts: Conflict[]) => void;
 }) {
@@ -117,14 +117,14 @@ export default function ConflictDialog({
           <button
             className="primary"
             disabled={busy}
-            onClick={() => send(`/api/conflicts/keep-all?batchId=${batchId}`, [])}
+            onClick={() => send(`/api/conflicts/keep-all?reviewId=${reviewId}`, [])}
           >
             Keep all
           </button>
           <button
             className="ghost"
             disabled={busy}
-            onClick={() => send(`/api/conflicts/cancel?batchId=${batchId}`, [])}
+            onClick={() => send(`/api/conflicts/cancel?reviewId=${reviewId}`, [])}
           >
             Cancel
           </button>

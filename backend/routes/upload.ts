@@ -65,7 +65,7 @@ router.post("/", async (req: Request, res: Response) => {
   if (errors.length)
     return res.status(422).json({ error: "Fix these rows and upload again.", errors });
 
-  const batchId = randomUUID();
+  const reviewId = randomUUID();
   const existing = await Row.find({ id: { $in: [...seen] } }).lean();
   const byId = new Map(existing.map((d) => [d.id, d]));
 
@@ -83,7 +83,7 @@ router.post("/", async (req: Request, res: Response) => {
     if (!changes.length) unchanged++;
     else
       conflicts.push({
-        batchId,
+        reviewId,
         id: doc.id,
         existing: current,
         incoming: doc,
@@ -106,7 +106,7 @@ router.post("/", async (req: Request, res: Response) => {
   // Conflicts are handed back only to the session that caused them, not
   // broadcast — nobody else should see or be able to resolve someone else's upload.
   res.status(201).json({
-    batchId,
+    reviewId,
     added: added.length,
     unchanged,
     conflicts: flagged.map((c) => ({ _id: String(c._id), id: c.id, changes: c.changes })),
